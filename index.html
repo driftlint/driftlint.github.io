@@ -1,1 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftLint — API Governance That Actually Works</title>
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #1e1e1e;
+            --accent: #49b618;
+            --accent-glow: #6de14a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border: #006312;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            line-height: 1.6; color: var(--text-primary); background: var(--bg-primary); 
+            overflow-x: hidden;
+            position: relative;
+        }
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .particle { position: absolute; background: var(--accent-glow); border-radius: 50%; animation: float 20s infinite linear; }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 10; }
+        header { 
+            background: rgba(30,30,30,0.95); backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,99,18,0.3); 
+            position: fixed; width: 100%; top: 0; z-index: 100; border-bottom: 1px solid var(--border);
+        }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 0; }
+        nav h1 { font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero { 
+            background: linear-gradient(135deg, #006312 0%, #1e1e1e 50%, #000 100%); 
+            padding: 160px 0 100px; text-align: center; position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(73,182,24,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(73,182,24,0.1) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite alternate;
+        }
+        @keyframes pulse { 0% { opacity: 0.5; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
+        .hero h2 { font-size: 3.2rem; font-weight: 900; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff, var(--text-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; position: relative; }
+        .hero p { font-size: 1.25rem; max-width: 650px; margin: 0 auto 2rem; opacity: 0.9; }
+        .cta { 
+            background: linear-gradient(135deg, var(--accent), var(--accent-glow)); color: #000; padding: 18px 40px; 
+            font-weight: 800; border: none; border-radius: 50px; text-decoration: none; display: inline-block; 
+            font-size: 1.15rem; box-shadow: 0 10px 30px rgba(73,182,24,0.4); transition: all .3s; position: relative; overflow: hidden;
+        }
+        .cta:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(73,182,24,0.6); }
+        .cta::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: left .5s; }
+        .cta:hover::before { left: 100%; }
+        .section { padding: 90px 0; }
+        .features { background: var(--bg-secondary); }
+        .features h3 { text-align: center; font-size: 2.5rem; margin-bottom: 3rem; color: var(--accent); font-weight: 800; }
+        table { width: 100%; border-collapse: collapse; background: var(--bg-primary); border: 2px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        th,td { padding: 1.2rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: linear-gradient(135deg, var(--bg-secondary), #2a2a2a); color: var(--accent-glow); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        tr:hover { background: rgba(73,182,24,0.1); transform: scale(1.01); transition: all .2s; }
+        .quickstart { background: var(--bg-primary); }
+        .quickstart h3 { text-align: center; font-size: 2.5rem; margin-bottom: 2rem; color: var(--accent); }
+        .quickstart pre { background: #0f0f0f; padding: 1.8rem; border-radius: 12px; overflow-x: auto; border: 1px solid var(--border); margin: 1.5rem 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); position: relative; }
+        .quickstart pre::before { content: '$'; position: absolute; top: 1rem; left: 1.5rem; color: var(--accent); font-weight: bold; }
+        code { color: var(--accent-glow); font-family: 'Monaco', monospace; font-size: 0.95em; }
+        .trust-badges { display: flex; justify-content: center; gap: 2rem; margin: 3rem 0; flex-wrap: wrap; }
+        .badge { background: rgba(73,182,24,0.1); padding: 1rem 1.5rem; border-radius: 50px; border: 1px solid var(--border); font-size: 0.9rem; font-weight: 600; }
+        .signup { text-align: center; background: var(--bg-primary); border-top: 2px solid var(--border); }
+        .signup h3 { font-size: 2.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, var(--accent), var(--accent-glow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .free-forever { 
+            background: linear-gradient(135deg, var(--accent), var(--accent-glow)); color: #000; padding: 1.2rem 2rem; 
+            border-radius: 50px; margin: 1.5rem 0; font-weight: 800; font-size: 1.1rem; 
+            box-shadow: 0 10px 30px rgba(73,182,24,0.4); display: inline-block;
+        }
+        form { max-width: 450px; margin: 0 auto; }
+        input, textarea { width: 100%; padding: 16px; margin-bottom: 1.2rem; background: rgba(30,30,30,0.8); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary); font-family: inherit; font-size: 1rem; transition: all .3s; }
+        input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 20px rgba(73,182,24,0.3); }
+        button { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent-glow)); color: #000; padding: 18px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 1.2rem; box-shadow: 0 10px 30px rgba(73,182,24,0.4); transition: all .3s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(73,182,24,0.6); }
+        .expectation { font-size: .95rem; color: var(--text-secondary); margin-top: 1.5rem; padding: 1rem; background: rgba(30,30,30,0.5); border-radius: 8px; border-left: 4px solid var(--accent); }
+        footer { background: var(--bg-secondary); color: var(--text-secondary); text-align: center; padding: 2rem 0; border-top: 1px solid var(--border); }
+        @media (max-width:768px) { .hero h2 { font-size: 2.2rem; } nav { flex-direction: column; gap: 1rem; padding: 1rem 0; } .trust-badges { flex-direction: column; align-items: center; gap: 1rem; } }
+    </style>
+</head>
+<body>
+    <canvas class="particles" id="particles"></canvas>
+    
+    <header>
+        <nav class="container">
+            <h1>DriftLint</h1>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h2>API Governance That Catches Drift Before It Breaks Production</h2>
+            <p><strong>Production-ready GitHub Action</strong> — Static analysis validates your OpenAPI specs against real code.</p>
+            <p>🔍 Missing routes • 🧟 Zombie endpoints • ✅ Full schema validation • 🛡️ Zero false positives</p>
+            <div style="margin: 2rem 0;">
+                <a href="https://github.com/driftlint/driftlint" class="cta" target="_blank" >Live on GitHub</a>
+                <a href="https://github.com/driftlint/driftlint-demo/pull/2" class="cta" target="_blank" >Demo Repo </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="trust-badges">
+                <div class="badge">🛡️ Static Analysis</div>
+                <div class="badge">⚡ Production Python</div>
+                <div class="badge">🔒 Local Execution</div>
+                <div class="badge">📈 GitHub Native</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features section">
+        <div class="container">
+            <h3>Production-Grade Polyglot Support</h3>
+            <table>
+                <tr><th>Language</th><th>Frameworks</th><th>Status</th></tr>
+                <tr><td><strong>Python</strong></td><td>Flask • FastAPI • Django</td><td><span style="color:var(--accent-glow)">✅ Live</span></td></tr>
+                <tr><td>TypeScript</td><td>Express • NestJS • Fastify</td><td>🟡 Beta</td></tr>
+                <tr><td>PHP</td><td>Laravel • Symfony</td><td>🟡 Beta</td></tr>
+            </table>
+        </div>
+    </section>
+
+    <section class="quickstart section">
+        <div class="container">
+            <h3>Zero-Config in 90 Seconds</h3>
+            <pre><code>name: Drift Check
+on: [pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+     - uses: actions/checkout@v3
+     - uses: driftlint/driftlint@v0.0.2
+       with:
+         config: .driftlinter.yml
+       env:
+         DRIFT_KEY: ${{ secrets.DRIFT_KEY }}</code></pre>
+            <pre><code># .driftlinter.yml
+projects:
+  - name: API Service
+    source_dir: src/api
+    spec_file: openapi.yaml
+    language: python</code></pre>
+        </div>
+    </section>
+
+    <section id="signup" class="signup section">
+        <div class="container">
+            <h3>Free Forever • All Repos (Beta) </h3>
+            <div class="free-forever">Production support • Live now • No credit card</div>
+            <p style="font-size:1.15rem;margin-bottom:2rem;">Trusted by engineering teams • Manual approval ensures quality</p>
+            
+            <form action="https://formspree.io/f/meezgwdd" method="POST">
+                <input type="email" name="email" placeholder="your@email.com" required>
+                <input type="text" name="github_repo" placeholder="username/public-repo-name" required>
+                <textarea name="notes" rows="3" placeholder="Public repo? Private team size? Current pain points..."></textarea>
+                <button> Share My Feedback</button>
+            </form>
+            
+
+        </div>
+    </section>
+
+    <footer class="container">
+        <p>Made with ❤️ for API engineers • <a href="https://github.com/driftlint/driftlint" style="color:var(--accent);">driftlint/driftlint</a> • © 2026</p>
+    </footer>
+
+    <script>
+        // Cool particle system
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        for(let i = 0; i < 30; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                size: Math.random() * 3 + 1,
+                speed: Math.random() * 0.5 + 0.2,
+                rotation: Math.random() * 360
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
+                ctx.fillStyle = `rgba(73, 182, 24, ${0.4 - p.y / canvas.height})`;
+                ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                ctx.restore();
+                p.y += p.speed;
+                p.rotation += 2;
+                if(p.y > canvas.height) p.y = -10;
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
 
